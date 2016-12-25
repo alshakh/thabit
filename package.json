@@ -1,0 +1,21 @@
+{
+  "name": "thabit",
+  "version": "0.0.1-pre",
+  "description": "A living static site generator",
+  "main": "build/main.js",
+  "typings" : "build/main",
+  "files" : [
+	  "build/"
+  ],
+  "scripts": {
+    "compile" : "PATH=\"$(npm bin):$PATH\" tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "debug" : "npm run compile ; node ."
+  },
+  "author": "Ahmed Alshakh <ahmed.s.alshakh@gmail.com> (http://alshakh.com)",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^6.0.53",
+    "typescript": "^2.1.4"
+  }
+}
