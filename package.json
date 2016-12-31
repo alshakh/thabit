@@ -1,21 +1,29 @@
 {
   "name": "thabit",
-  "version": "0.0.1-pre",
-  "description": "A living static site generator",
-  "main": "build/main.js",
-  "typings" : "build/main",
-  "files" : [
-	  "build/"
+  "version": "0.1.0-pre02",
+  "__description": "A living static site generator",
+  "description": "Just an experiment",
+  "main": "build/src/main.js",
+  "typings": "build/src/main",
+  "files": [
+    "build/src"
   ],
   "scripts": {
-    "compile" : "PATH=\"$(npm bin):$PATH\" tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "debug" : "npm run compile ; node ."
+    "build": "PATH=\"$(npm bin):$PATH\" tsc",
+    "test": "npm run build && mocha build/test",
+    "debug": "npm run build && node ."
   },
   "author": "Ahmed Alshakh <ahmed.s.alshakh@gmail.com> (http://alshakh.com)",
   "license": "MIT",
   "devDependencies": {
+    "@types/mocha": "^2.2.35",
     "@types/node": "^6.0.53",
+    "mocha": "^3.2.0",
     "typescript": "^2.1.4"
+  },
+  "dependencies": {},
+  "repository" : {
+	  "type" : "git",
+	  "url" : "https://github.com/alshakh/thabit"
   }
 }
