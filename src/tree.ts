@@ -1,15 +1,9 @@
+export type Leaf = string | number | boolean | Object |  Function ;
 export type Node = Tree | Leaf | Link;
 //
-export abstract class Leaf {
-  readonly nodeType: "leaf" = "leaf";
-  // abstract unwrap(): any;
-  abstract summary: string;
-}
-//
 export class Link {
-  readonly nodeType: "link" = "link"
   readonly path: string;
-  get summary() {
+  toString() : string {
     return `Link --> ${this.path}`;
   }
   constructor(path: string) {
@@ -25,22 +19,20 @@ export class ResolveError extends Error {
 }
 //
 export class Tree {
-  readonly nodeType: "tree" = "tree";
-  //
   private subnodes: { [mountPoint: string]: Node };
   private parent: Tree | undefined = undefined;
   private _mount(newChild: Node, parentParts: string[], mountPoint: string): string | true {
     if (mountPoint === '' || mountPoint === '.' || mountPoint === '..') {
       return `cannot mount on '', . or ..`;
     }
-    if (newChild.nodeType === 'tree' && newChild.parent !== undefined) {
+    if (newChild instanceof Tree && newChild.parent !== undefined) {
       return 'Cannot mount a <tree> twice';
     }
 
     let p: Tree = this;
     if (parentParts.length > 0) {
       let q = this._resolve(parentParts, false);
-      if (q === null || q.nodeType !== 'tree') {
+      if (q === null || ! (q instanceof Tree)) {
         return `parent is not a tree`;
       }
       p = q
@@ -48,13 +40,13 @@ export class Tree {
 
     // unmount previous value;
     let prevNode = p.subnodes[mountPoint];
-    if (prevNode !== undefined && prevNode.nodeType === 'tree') {
+    if (prevNode !== undefined && prevNode instanceof Tree) {
       prevNode.parent = undefined;
     }
 
     // mount new value
     p.subnodes[mountPoint] = newChild;
-    if (newChild.nodeType === 'tree') {
+    if (newChild instanceof Tree) {
       newChild.parent = p;
     }
     return true;
@@ -78,12 +70,12 @@ export class Tree {
     let q = path.split('/');
     let parent = this.resolve(q.slice(0, q.length - 1).join('/'), true);
     let basename = q[q.length - 1];
-    if (parent.nodeType !== 'tree') {
+    if (! (parent instanceof Tree)) {
       return null;
     }
     let c = parent.subnodes[basename];
     delete parent.subnodes[basename];
-    if (c.nodeType === 'tree') {
+    if (c instanceof Tree) {
       c.parent = undefined;
     }
     return c;
@@ -102,7 +94,7 @@ export class Tree {
 
         // resolve links
         // TODO : Error is not clear
-        if (result !== undefined && !ignoreLinks && result.nodeType === 'link') {
+        if (!ignoreLinks && result instanceof Link) {
           result = this.resolve(result.path);
         }
       }
@@ -116,10 +108,10 @@ export class Tree {
     if (parts.length === 1) {
       return resolved;
     } else { // more resolving required
-      if (resolved.nodeType !== 'tree') {
-        return null;
-      } else {
+      if (resolved instanceof Tree) {
         return resolved._resolve(parts.slice(1), ignoreLinks);
+      } else {
+        return null;
       }
     }
   }
@@ -170,24 +162,22 @@ export class Tree {
         continue;
       }
       let q = this.subnodes[i];
-      output += `\n${prefix}${i}` + (q.nodeType === 'tree' ? '/' + q._summary(prefix + prefixUnit, prefixUnit) : ` : ${q.summary}`);
+      output += `\n${prefix}${i}` + (q instanceof Tree ? '/' + q._summary(prefix + prefixUnit, prefixUnit) : ` : ${q}`);
     }
     return output;
   }
-  get summary(): string {
+ toString() : string {
     return '/' + this._summary('   ', '   ');
   }
   static makeTree(schema: { [subnode: string]: any }): Tree {
     let treeRoot = new Tree();
     for (let i in schema) {
-      if (typeof schema[i] === 'string') {
-        treeRoot.mount(i, new Link(schema[i]));
-      } else if (schema[i] instanceof Leaf) {
-        treeRoot.mount(i, schema[i]);
-      } else if (typeof schema[i] === 'object') {
-        treeRoot.mount(i, Tree.makeTree(schema[i]));
-      } else {
-        treeRoot.mount(i, new Tree());
+      let q = schema[i];
+      if (typeof q === 'object' && ('_' in q)) {
+        delete q['_']
+        treeRoot.mount(i, Tree.makeTree(q));
+      } else  {
+        treeRoot.mount(i, q);
       }
     }
     return treeRoot;
@@ -201,7 +191,7 @@ export class Tree {
       let mySubnode = this.subnodes[i];
       let otherSubnode = overTree.subnodes[i];
       if (mySubnode === undefined
-        || !(otherSubnode.nodeType === 'tree' && mySubnode.nodeType === 'tree')) {
+        || !(otherSubnode instanceof Tree && mySubnode instanceof Tree)) {
         // I don't have the subnode
         // OR we both don't have trees
         overTree.unmount(i);
