@@ -1,0 +1,16 @@
+HOME BEGIN
+
+<%= title %>
+
+<% // comment %> 
+picture is in <%- resolve('./$pic') %>
+<%- qqqq %>
+<%= include('./footer.partial') %>
+!!!!!
+<%= include('./+/year.partial') %>
+<%- qqqq %>
+
+<% for(var i = 0 ; i < users.length ; i++) { %>
+<li><%- users[i] %></li>
+<% } %>
+HOME END

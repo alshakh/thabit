@@ -1,11 +1,11 @@
 {
-    "compilerOptions": {
-        "strictNullChecks": true,
-        "module": "commonjs",
-        "target": "es5",
-        "noImplicitAny": true,
-	"declaration": true,
-        "sourceMap": false,
-        "outDir": "build"
-    }
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "module": "commonjs",
+    "target": "es5",
+    "noImplicitAny": true,
+    "declaration": true,
+    "sourceMap": false,
+    "outDir": "build"
+  }
 }

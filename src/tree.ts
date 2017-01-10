@@ -1,9 +1,10 @@
-export type Leaf = string | number | boolean | Object |  Function ;
+import { inspect } from 'util';
+export type Leaf = string | number | boolean | Object | Function;
 export type Node = Tree | Leaf | Link;
 //
 export class Link {
   readonly path: string;
-  toString() : string {
+  toString(): string {
     return `Link --> ${this.path}`;
   }
   constructor(path: string) {
@@ -32,7 +33,7 @@ export class Tree {
     let p: Tree = this;
     if (parentParts.length > 0) {
       let q = this._resolve(parentParts, false);
-      if (q === null || ! (q instanceof Tree)) {
+      if (q === null || !(q instanceof Tree)) {
         return `parent is not a tree`;
       }
       p = q
@@ -70,7 +71,7 @@ export class Tree {
     let q = path.split('/');
     let parent = this.resolve(q.slice(0, q.length - 1).join('/'), true);
     let basename = q[q.length - 1];
-    if (! (parent instanceof Tree)) {
+    if (!(parent instanceof Tree)) {
       return null;
     }
     let c = parent.subnodes[basename];
@@ -137,6 +138,48 @@ export class Tree {
     }
     return r;
   }
+  resolveTree(query: string): Tree {
+    let q = this.resolve(query, false);
+    if (!(q instanceof Tree)) {
+      throw new ResolveError(`${query} is not a tree`);
+    }
+    return q;
+  }
+  resolveStr(query: string): string {
+    let q = this.resolve(query, false);
+    if (!(typeof q === 'string')) {
+      throw new ResolveError(`${query} is not a string`);
+    }
+    return q;
+  }
+  resolveFn(query: string): Function {
+    let q = this.resolve(query, false);
+    if (!(typeof q === 'function')) {
+      throw new ResolveError(`${query} is not a function`);
+    }
+    return q;
+  }
+  resolveNum(query: string): number {
+    let q = this.resolve(query, false);
+    if (!(typeof q === 'number')) {
+      throw new ResolveError(`${query} is not a number`);
+    }
+    return q;
+  }
+  resolveBool(query: string): boolean {
+    let q = this.resolve(query, false);
+    if (!(typeof q === 'boolean')) {
+      throw new ResolveError(`${query} is not a number`);
+    }
+    return q;
+  }
+  resolveObj(query: string): Object {
+    let q = this.resolve(query, false);
+    if (!(typeof q === 'object') || q instanceof Tree || q instanceof Link) {
+      throw new ResolveError(`${query} is not an object`);
+    }
+    return q;
+  }
   list(): string[] {
     let l = [];
     for (let i in this.subnodes) {
@@ -146,6 +189,19 @@ export class Tree {
       l.push(i);
     }
     return l;
+  }
+  private _leafSummary(q: any): string {
+    if (typeof q === 'function') {
+      return q.toString().substr(0, q.toString().indexOf('{'));
+    } else if (typeof q === 'string') {
+      return q;
+    } else if (q instanceof Link) {
+      return q.toString();
+    } else if (typeof q === 'object') {
+      return inspect(q, false)
+    } else {
+      return q;
+    }
   }
   private _summary(prefix: string, prefixUnit: string): string {
     let output = '';
@@ -162,21 +218,21 @@ export class Tree {
         continue;
       }
       let q = this.subnodes[i];
-      output += `\n${prefix}${i}` + (q instanceof Tree ? '/' + q._summary(prefix + prefixUnit, prefixUnit) : ` : ${q}`);
+      output += `\n${prefix}${i} ${q instanceof Tree ? '/' + q._summary(prefix + prefixUnit, prefixUnit) : ': ' + this._leafSummary(q)}`;
     }
     return output;
   }
- toString() : string {
+  toString(): string {
     return '/' + this._summary('   ', '   ');
   }
   static makeTree(schema: { [subnode: string]: any }): Tree {
     let treeRoot = new Tree();
+    delete schema['_'];
     for (let i in schema) {
       let q = schema[i];
       if (typeof q === 'object' && ('_' in q)) {
-        delete q['_']
         treeRoot.mount(i, Tree.makeTree(q));
-      } else  {
+      } else {
         treeRoot.mount(i, q);
       }
     }

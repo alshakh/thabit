@@ -8,6 +8,9 @@
   "files": [
     "build/src"
   ],
+  "bin": {
+    "thabit": "build/src/bin.js"
+  },
   "scripts": {
     "build": "PATH=\"$(npm bin):$PATH\" tsc",
     "test": "npm run build && mocha build/test",
@@ -16,14 +19,17 @@
   "author": "Ahmed Alshakh <ahmed.s.alshakh@gmail.com> (http://alshakh.com)",
   "license": "MIT",
   "devDependencies": {
+    "@types/lodash.template": "^4.4.0",
     "@types/mocha": "^2.2.35",
     "@types/node": "^6.0.53",
     "mocha": "^3.2.0",
     "typescript": "^2.1.4"
   },
-  "dependencies": {},
-  "repository" : {
-	  "type" : "git",
-	  "url" : "https://github.com/alshakh/thabit"
+  "dependencies": {
+    "lodash.template": "^4.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alshakh/thabit"
   }
 }

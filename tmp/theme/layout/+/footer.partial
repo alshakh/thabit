@@ -1,0 +1,4 @@
+FOOTER BEGIN
+
+<%= qqqq %> Org is <%= org_name %>, year is <%- include('/partials/year.partial', {qqqq : 'inner'}) %>.
+FOOTER END
